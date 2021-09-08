@@ -1,34 +1,37 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Movies from "../components/Movies";
 import Loader from "../components/Loader";
 import Search from "../components/Search";
 
-export default class Main extends React.Component {
-    state = {
-        movies: [],
-        loading: true
-    }
+export default function Main (){
+    const [movies, setMovies] = useState([]);
+    const [loading, setLoadin] = useState(true);
 
-    componentDidMount() {
-        fetch('http://www.omdbapi.com/?apikey=dc93d3da&s=panda')
+
+
+   const searchMovies = (str, type = 'all') =>{
+        setLoadin(true);
+        fetch(`http://www.omdbapi.com/?apikey=329ffa13&s=${str}${type!=='all'? `&type=${type}` : ''}`)
             .then(response => response.json())
-            .then(data => this.setState({movies: data.Search, loading:false}))
-    }
+            .then((data) => {
+                setLoadin(false);
+                setMovies(data.Search);
+            });
+    };
 
-    searchMovies = (str, type = 'all') =>{
-        this.setState({loading:true})
-        fetch(`http://www.omdbapi.com/?apikey=dc93d3da&s=${str}${type!=='all'? `&type=${type}` : ''}`)
+    useEffect(()=>{
+        fetch('http://www.omdbapi.com/?apikey=329ffa13&s=man')
             .then(response => response.json())
-            .then(data => this.setState({movies: data.Search, loading:false}))
-    }
+            .then(data => {
+                setMovies(data.Search);
+                setLoadin(false);
+            });
+    }, [])
 
-    render() {
         return (
-
             <div className="container content">
-                <Search searchMovies={this.searchMovies} />
-                {this.state.loading ? <Loader/> :  (<Movies movies={this.state.movies}/>)}
+                <Search searchMovies={searchMovies} />
+                {loading ? <Loader/> :  (<Movies movies={movies}/>)}
             </div>
         )
     }
-}
